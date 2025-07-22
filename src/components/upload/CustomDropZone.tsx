@@ -18,6 +18,11 @@ import {
   DEFAULT_CONFIGS,
   ValidationResult,
 } from "@/lib/file-validator";
+import {
+  SecurityScanner,
+  SECURITY_CONFIGS,
+  SecurityScanResult,
+} from "@/lib/security-scanner";
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -26,6 +31,7 @@ interface FileWithPreview extends File {
   status?: "pending" | "uploading" | "success" | "error";
   error?: string;
   validationResult?: ValidationResult;
+  securityScanResult?: SecurityScanResult; // Add security scan result with proper type
 }
 
 interface CustomDropZoneProps {
@@ -34,6 +40,7 @@ interface CustomDropZoneProps {
   maxSize?: number;
   allowedTypes?: string[];
   config?: "IMAGE_ONLY" | "DOCUMENT_ONLY" | "GENERAL";
+  securityLevel?: "basic" | "moderate" | "strict"; // Add security level prop
 }
 
 export function CustomDropZone({
@@ -42,6 +49,7 @@ export function CustomDropZone({
   maxSize = 10 * 1024 * 1024, // 10MB
   allowedTypes = ["image/*", "application/pdf", "text/*"],
   config = "GENERAL",
+  securityLevel = "moderate", // Add security level prop
 }: CustomDropZoneProps) {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -56,6 +64,13 @@ export function CustomDropZone({
     maxFiles,
   };
   const validator = new FileValidator(validatorConfig);
+
+  // Initialize security scanner based on security level
+  const securityConfig =
+    SECURITY_CONFIGS[
+      securityLevel.toUpperCase() as keyof typeof SECURITY_CONFIGS
+    ];
+  const securityScanner = new SecurityScanner(securityConfig);
 
   const handleDrop = useCallback(async (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -78,7 +93,7 @@ export function CustomDropZone({
   const processFiles = async (newFiles: File[]) => {
     if (!newFiles.length) return;
 
-    // Validate files
+    // Step 1: Basic file validation
     const validation = await validator.validateFiles(newFiles);
 
     if (!validation.isValid) {
@@ -100,13 +115,53 @@ export function CustomDropZone({
       });
     });
 
-    // Process valid files
+    // Process each file with security scanning
     const validFiles: FileWithPreview[] = [];
 
     for (const file of newFiles) {
       const fileValidation = await validator.validateFile(file);
 
-      // Create a FileWithPreview that preserves File properties
+      // Step 2: Security threat scanning (CRITICAL FIX)
+      let securityScanResult = null;
+      let isSecurityClean = true;
+      let securityThreats: string[] = [];
+
+      if (fileValidation.isValid) {
+        try {
+          // Perform comprehensive security scan
+          console.log(`🔍 Scanning ${file.name} for security threats...`);
+          securityScanResult = await securityScanner.scanFile(file);
+          isSecurityClean = securityScanResult.isClean;
+
+          if (!isSecurityClean) {
+            securityThreats = securityScanResult.threats.map((t) => t.name);
+            console.warn(
+              `⚠️ Threats detected in ${file.name}:`,
+              securityThreats
+            );
+
+            // Show security threat notification
+            toast({
+              title: "🚨 Security Threat Detected!",
+              description: `${file.name}: ${securityThreats.join(", ")}`,
+              variant: "destructive",
+            });
+          } else {
+            console.log(`✅ ${file.name} passed security scan`);
+          }
+        } catch (error) {
+          console.error("Security scan error:", error);
+          toast({
+            title: "Security Scan Failed",
+            description: `Could not complete security scan for ${file.name}`,
+            variant: "destructive",
+          });
+          isSecurityClean = false;
+          securityThreats = ["Security scan error"];
+        }
+      }
+
+      // Create a FileWithPreview with security results
       const fileWithPreview = {
         // Preserve native File properties
         name: file.name,
@@ -124,12 +179,16 @@ export function CustomDropZone({
         preview: file.type.startsWith("image/")
           ? URL.createObjectURL(file)
           : undefined,
-        status: fileValidation.isValid ? "pending" : "error",
+        status:
+          !fileValidation.isValid || !isSecurityClean ? "error" : "pending",
         uploadProgress: 0,
         validationResult: fileValidation,
-        error: fileValidation.isValid
-          ? undefined
-          : fileValidation.errors.join(", "),
+        securityScanResult: securityScanResult,
+        error: !fileValidation.isValid
+          ? fileValidation.errors.join(", ")
+          : !isSecurityClean
+          ? `Security threats: ${securityThreats.join(", ")}`
+          : undefined,
       } as FileWithPreview;
 
       validFiles.push(fileWithPreview);

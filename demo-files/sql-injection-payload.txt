@@ -1,0 +1,45 @@
+-- Database Migration Script
+-- Project: Customer Portal
+-- Date: January 2024
+
+-- Legitimate table creation
+CREATE TABLE customers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(150),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Insert sample data
+INSERT INTO customers (name, email) VALUES ('John Doe', 'john@example.com');
+
+-- MALICIOUS SQL INJECTION PAYLOADS BELOW - WILL BE DETECTED
+
+-- SQL Injection Payload 1: Union-based injection
+' UNION SELECT username, password FROM admin_users WHERE '1'='1
+
+-- SQL Injection Payload 2: Drop table attack
+'; DROP TABLE customers; --
+
+-- SQL Injection Payload 3: Information extraction
+' OR 1=1; SELECT * FROM information_schema.tables WHERE table_schema='public' --
+
+-- SQL Injection Payload 4: Blind SQL injection
+' AND (SELECT COUNT(*) FROM admin_users WHERE username='admin' AND password LIKE 'a%') > 0 --
+
+-- SQL Injection Payload 5: Time-based blind injection
+'; WAITFOR DELAY '00:00:10' --
+
+-- SQL Injection Payload 6: Boolean-based blind injection
+' AND (SELECT SUBSTRING(password, 1, 1) FROM admin_users WHERE username='admin') = 'a' --
+
+-- SQL Injection Payload 7: Error-based injection
+' AND (SELECT * FROM (SELECT COUNT(*), CONCAT(version(), FLOOR(RAND(0)*2)) x FROM information_schema.tables GROUP BY x) a) --
+
+-- SQL Injection Payload 8: Out-of-band injection
+'; INSERT INTO temp_table SELECT load_file('/etc/passwd'); --
+
+-- SQL Injection Payload 9: Second-order injection
+UPDATE customers SET name = ''; DELETE FROM customers WHERE id > 0; --' WHERE id = 1;
+
+-- End of malicious payloads 

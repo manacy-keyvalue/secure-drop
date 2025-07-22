@@ -272,6 +272,7 @@ export default function SecureDropWrapper({
             maxSize={maxFileSize}
             allowedTypes={allowedTypes}
             config="GENERAL"
+            securityLevel={securityLevel}
           />
 
           {/* Error Display */}

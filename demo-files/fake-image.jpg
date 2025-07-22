@@ -1,0 +1,16 @@
+MZ      ÿÿ  ¸       @  €  !     €        This file appears to be a JPEG image but contains executable code!
+
+This is a Windows PE executable file disguised as a JPEG image.
+The magic bytes "MZ" at the beginning reveal its true nature.
+
+SecureDrop's magic byte validation will detect this mismatch between:
+- File Extension: .jpg
+- MIME Type: image/jpeg (claimed)
+- Actual Content: Windows PE Executable
+
+Malicious payload simulation:
+- Could contain trojans, viruses, or backdoors
+- Bypasses simple extension filtering
+- Requires deep content inspection to detect
+
+This demonstrates why magic byte validation is critical for security. 

