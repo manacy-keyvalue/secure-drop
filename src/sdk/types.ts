@@ -14,8 +14,9 @@ export interface SecurityScanResult {
   threats: SecurityThreat[];
   scanTime: number;
   scanner: string;
-  confidence: number;
-  quarantined: boolean;
+  confidence?: number;
+  quarantined?: boolean;
+  [key: string]: any; // Index signature for Supabase Json compatibility
 }
 
 export interface SecurityThreat {

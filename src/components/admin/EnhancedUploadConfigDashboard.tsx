@@ -44,6 +44,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SECURITY_CONFIGS } from "@/lib/security-scanner";
+import { SecurityScanResult } from "@/sdk/types";
 
 interface EnhancedUploadConfig {
   id: string;
@@ -113,17 +114,17 @@ export function EnhancedUploadConfigDashboard() {
 
       const enhancedConfigs = (data || []).map((config) => ({
         ...config,
-        description: config.description || "Default configuration",
-        blocked_extensions: config.blocked_extensions || [],
-        filename_pattern: config.filename_pattern || "",
-        security_level: config.security_level || "moderate",
-        virus_scanning_enabled: config.virus_scanning_enabled ?? true,
-        injection_detection_enabled: config.injection_detection_enabled ?? true,
-        yara_scanning_enabled: config.yara_scanning_enabled ?? false,
-        custom_signatures: config.custom_signatures || [],
-        webhook_url: config.webhook_url || "",
-        is_active: config.is_active ?? true,
-        usage_count: config.usage_count || 0,
+        description: "Default configuration",
+        blocked_extensions: [] as string[],
+        filename_pattern: "",
+        security_level: "moderate" as const,
+        virus_scanning_enabled: true,
+        injection_detection_enabled: true,
+        yara_scanning_enabled: false,
+        custom_signatures: [] as string[],
+        webhook_url: "",
+        is_active: true,
+        usage_count: 0,
       })) as EnhancedUploadConfig[];
 
       setConfigs(enhancedConfigs);
@@ -173,16 +174,17 @@ export function EnhancedUploadConfigDashboard() {
         totalUploads > 0 ? (successCount / totalUploads) * 100 : 0;
 
       // Count threats from scan results
-      const threatCount =
-        uploads?.filter(
-          (upload) => upload.scan_result && !upload.scan_result.isClean
-        ).length || 0;
+      const threatCount = uploads?.filter((upload) => {
+        const scanResult = upload.scan_result as SecurityScanResult;
+        return scanResult && !scanResult.isClean;
+      }).length || 0;
 
       // Aggregate top threats
       const threatMap = new Map<string, { count: number; severity: string }>();
       uploads?.forEach((upload) => {
-        if (upload.scan_result && upload.scan_result.threats) {
-          upload.scan_result.threats.forEach((threat: any) => {
+        const scanResult = upload.scan_result as SecurityScanResult;
+        if (scanResult && scanResult.threats) {
+          scanResult.threats.forEach((threat: any) => {
             const existing = threatMap.get(threat.name) || {
               count: 0,
               severity: threat.severity,

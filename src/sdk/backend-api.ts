@@ -347,7 +347,6 @@ export class SecureDropAPI {
     const { data: record, error } = await supabase
       .from("file_uploads")
       .insert({
-        user_id: data.userId,
         filename: data.filename,
         original_filename: data.originalFilename,
         file_size: data.fileSize,
@@ -356,7 +355,8 @@ export class SecureDropAPI {
         file_hash: data.fileHash,
         status: "scanning",
         expires_at: data.expiresAt.toISOString(),
-        scan_result: data.securityScanResult || null,
+        scan_result: data.securityScanResult as any || null,
+        user_id: data.userId,
       })
       .select()
       .single();

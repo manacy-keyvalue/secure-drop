@@ -6,7 +6,7 @@
  */
 
 import { FileValidationConfig, ValidationResult } from '../lib/file-validator';
-import { BackendUploadOptions, SecurityScanResult, AuditLogEntry } from './types';
+import { BackendUploadOptions, SecurityScanResult, AuditLogEntry, SecurityThreat } from './types';
 
 /**
  * Backend file validator that can work with Node.js Buffer objects
@@ -162,12 +162,22 @@ export async function performSecurityScan(
     buffer.includes(signature)
   );
 
-  const threats: string[] = [];
+  const threats: SecurityThreat[] = [];
   if (hasSuspiciousExtension) {
-    threats.push('Suspicious file extension detected');
+    threats.push({
+      type: 'suspicious_content',
+      name: 'Suspicious Extension',
+      severity: 'medium',
+      description: 'Suspicious file extension detected'
+    });
   }
   if (containsSignature) {
-    threats.push('Malware signature detected');
+    threats.push({
+      type: 'malware',
+      name: 'Malware Signature',
+      severity: 'high',
+      description: 'Malware signature detected'
+    });
   }
 
   return {
